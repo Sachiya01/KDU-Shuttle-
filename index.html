@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDU Shuttle Tracking System</title>
+    <link rel="stylesheet" type="text/css" href="Styles.css">
+    <script src="script.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-database.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAov5w8OROW3JyyBoAsN13Zet36uClLYys&callback=initMap" async defer></script>
+</head>
+
+<body>
+    <div id="header">
+        <img src="https://mpc.kdu.ac.lk/wp-content/uploads/2017/02/cropped-Crest-KDU.png">
+        <span class="header-text-1">General Sir John Kotelawala <br> Defence University <br> <span class="header-text-4">For the Motherland Forever | සිය රටටමයි කවදත්  </span></span>
+        <span class="header-text-2"> Shuttle Tracking System <br> &nbsp &nbsp &nbsp &nbsp <span class="header-text-3">Live Updates Portal</span></span>
+    </div>
+
+    <div id="hamburger">☰</div>
+    <div id="search-container">
+        <form id="search-form">
+            <input type="text" id="destination" placeholder="Enter destination address">
+            <button type="submit">Search</button>
+        </form>
+
+
+    </div>
+    <div id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">List of Shuttles</div>
+            <select id="shuttle-dropdown" class="dropdown"></select>
+            <div id="shuttle-info" class="shuttle-info"></div>
+        </div>
+        <button id="clear-route-btn">Clear Route</button>
+
+    </div>
+
+    <div id="map"></div>
+    <div id="footer">© 2024 KDU Shuttle Tracking System | Version 1.0</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAov5w8OROW3JyyBoAsN13Zet36uClLYys",
+            authDomain: "smartbus-ed6c2.firebaseapp.com",
+            databaseURL: "https://smartbus-ed6c2-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "smartbus-ed6c2",
+            storageBucket: "smartbus-ed6c2.appspot.com",
+            messagingSenderId: "102623018971",
+            appId: "1:102623018971:web:d4ca07ca3b77e29f9431fe",
+            measurementId: "G-52L0E53P8G"
+        };
+
+        let busMarkers = {};  // Object to store bus markers by bus ID
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        function fetchAndTrackBusLocations() {
+            const busesRef = ref(db, '/busLocation');
+            
+            // Listen for changes in all bus locations
+            onValue(busesRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const busesData = snapshot.val();
+                    Object.keys(busesData).forEach((busId) => {
+                        const busData = busesData[busId];
+                        const lat = parseFloat(busData.latitude);  // Assuming 'latitude' is the key for latitude
+                        const lng = parseFloat(busData.longitude); // Assuming 'longitude' is the key for longitude
+                        updateBusMarker(busId, lat, lng);
+                    });
+                } else {
+                    alert("No buses available");
+                }
+            });
+        }
+
+        function assignDrivers() {
+            const busAssignmentsRef = ref(db, 'busAssignments');
+
+            // Listen for changes in all bus locations
+            onValue(busAssignmentsRef, (busAssignmentsSnapshot) => {
+                const busAssignments = busAssignmentsSnapshot.val();
+
+                // Loop through each bus in busAssignments
+                for (const bus in busAssignments) {
+                    const driverId = busAssignments[bus].driver;
+
+                    // Fetch driver details
+                    onValue(ref(db, `drivers/${driverId}`), (driverSnapshot) => {
+                        const driver = driverSnapshot.val();
+
+                        // Check if driver data exists
+                        if (driver) {
+                            const first = driver.name.firstName_d;
+                            const last = driver.name.lastName_d;
+
+                            // Fetch tracker details
+                            onValue(ref(db, `tracker/${bus}`), (trackerSnapshot) => {
+                                const tracker = trackerSnapshot.val();
+
+                                // Check if tracker data exists
+                                if (tracker) {
+                                    const latitude = tracker.latitude;
+                                    const longitude = tracker.longitude;
+                                    const passengers = tracker.passengers;
+
+                                   
+                                    updateBusMarker(bus, latitude, longitude, first, last, passengers);
+                                } else {
+                                    console.log(`Tracker data not available for bus ${bus}`);
+                                }
+                            });
+                        } else {
+                            console.log(`Driver data not available for driverId ${driverId}`);
+                        }
+                    });
+                }
+            });
+        }
+        
+
+        // Update or create bus markers for each bus
+        function updateBusMarker(busId, lat, lng, first, last, pass, route) {
+            const busLocation = { lat: lat, lng: lng };
+
+            // If the marker for this bus does not exist yet, create it
+            if (!busMarkers[busId]) {
+                const customIcon = {
+                    url: 'https://i.ibb.co/wcDyX2h/3ba1cbc7b2fd44ef59b0da8775f7da44-removebg-preview-2.png',
+                    scaledSize: new google.maps.Size(32, 32)
+                };
+                const highlightedIcon = {
+                    url: 'https://toppng.com/uploads/preview/radio-button-selected-icon-11549836017rf1l6djukk.png',
+                    scaledSize: new google.maps.Size(40, 40)
+                };
+
+                const busMarker = new google.maps.Marker({
+                    position: busLocation,
+                    map: map,
+                    icon: customIcon,
+                    title: `Bus ${busId}`
+                });
+
+                busMarkers[busId] = busMarker;
+                // Handle bus marker click events
+                busMarker.addListener('click', () => {
+                    if (activeBusMarker && activeBusMarker !== busMarker) {
+                        activeBusMarker.setIcon(customIcon);
+                    }
+                    busMarker.setIcon(highlightedIcon);
+                    activeBusMarker = busMarker;
+
+                    if (userLocation) {
+                        calculateDistanceAndTime(userLocation,busId, busLocation, busMarker, first, last, pass, route);
+                    } else {
+                        alert('User location not available.');
+                    }
+                });
+            } else {
+                // If the bus marker already exists, just update its position
+                busMarkers[busId].setPosition(busLocation);
+            }
+        }
+
+        // Show location on Google Maps
+        function showOnMap(lat, lng) {
+            const mapOptions = {
+                center: { lat: lat, lng: lng },
+                zoom: 14
+            };
+        }
+
+        function changeMarkerIcon(marker) {
+        marker.setIcon({
+            url: "https://i.ibb.co/wcDyX2h/3ba1cbc7b2fd44ef59b0da8775f7da44-removebg-preview-2.png",  // URL of the new icon
+            scaledSize: new google.maps.Size(32, 32)  // You can adjust the size
+        });
+    }
+
+        // Close info window when clicking anywhere on the map
+        map.addListener('click', function () {
+            if (activeInfoWindow) {
+                activeInfoWindow.close();
+                changeMarkerIcon(activeBusMarker);
+                //activeBusMarker.setIcon(customIcon);
+            }
+        });
+
+        window.onload = function() {
+            assignDrivers();
+            loadShuttleRoutes();
+            addDropdownListener();
+        };
+    </script>
+</body>
+</html>

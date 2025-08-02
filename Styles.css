@@ -1,0 +1,265 @@
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: "San Francisco";
+}
+
+/* Header */
+#header {
+    background-color: #002147;
+    color: #ecf0f1;
+    padding: 12px;
+    text-align: left;
+    font-family: 'Frutiger';
+    font-weight: bold;
+    font-size: 30px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 3;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+#header img {
+    height: 90px;
+    margin-right: 20px;
+    margin-left: 50px;
+}
+
+/* Individual Text Styling */
+.header-text-1 {
+    font-family: 'Arial', sans-serif;
+    font-size: 18px;
+    color: #ffffff;
+    align-items: left;
+    margin-right: 125px;
+}
+.header-text-4 {
+    font-family: 'Arial', serif;
+    font-size: 12px;
+    margin-left:0px;
+    color: #ffffff;
+}
+
+.header-text-2 {
+    font-family: 'Arial', sans-serif;
+    font-size: 28px;
+    color: #ffffff;
+    margin-left: 5px;
+}
+
+.header-text-3 {
+    font-family: 'Georgia', serif;
+    font-size: 20px;
+    margin-left:0px;
+    color: #ff1100;
+}
+
+
+
+/* Footer */
+#footer {
+    background-color: #002147;
+    color: #ecf0f1;
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 3;
+}
+
+/* Map */
+#map {
+    height: calc(100% - 50px); /* Account for header and footer */
+    width: 100%;
+    margin-top: 40px;
+}
+
+/* Responsive typography */
+@media screen and (min-width: 1024px) {
+    :root {
+      --h2-font-size: 1.75rem;
+      --normal-font-size: 1rem;
+      --small-font-size: .875rem;
+      --smaller-font-size: .813rem;
+    }
+  }
+
+/*Search Container*/
+#search-container {
+    padding: 5px;
+    background-color: #ffffff;
+    position: fixed;
+    top: 30px;
+    margin-left: 450px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+#search-container input {
+    padding: 10px;
+    margin: 2px;
+    font-size: 12px;
+    border-radius: 12px;
+}
+
+
+#search-container button {
+    padding: 12px;
+    margin: 2px;
+    font-size: 10px;
+    background-color: #4c8bf5;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+#search-container button:hover {
+    background-color: #2b62c0;
+}
+/* Styling the clear route button */
+#clear-route-btn {
+    padding: 10px;
+    margin-top: 0px;
+    font-size: 15px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-left:70px;
+    width: 50%; /* Ensures it aligns well with the input field */
+}
+
+#clear-route-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Sidebar */
+#sidebar {
+    height: calc(100% - 10px);
+    width: 300px;
+    position: fixed;
+    top: 114px;
+    left: -310px;
+    background-color: #243b7f;
+    padding: 10px;
+    box-shadow: 8px 0 10px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    transition: left 0.5s;
+    z-index: 3;
+}
+
+#sidebar.open {
+    left: 0;
+}
+
+#sidebar.open + #hamburger {
+    left: 370px;
+}
+
+/* Hamburger Menu */
+#hamburger {
+    position: fixed;
+    top: 40px;
+    left: 20px;
+    background-color: #ecf0f1;
+    padding: 5px;
+    border-radius: 5px;
+    z-index: 4;
+    cursor: pointer;
+    font-size: 18px;
+    transition: left 0.3s;
+}
+#hamburger:hover {
+    background-color: #979d9e;
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+    margin-bottom: 10px;
+}
+
+.sidebar-title {
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-family: 'Mono';
+    font-size: 22px;
+    color: #ffffff;
+    padding: 5px;
+    background-color: #169bd6;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.dropdown {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #219ebc;
+    font-size: 18px;
+    margin-bottom: 5px;
+    background-color: #fff;
+    color: #333;
+    font-family: "Calibri";
+    text-align: center;
+    
+}
+
+.shuttle-info {
+    padding: 3px;
+    border-radius: 10px;
+    background-color: #545555;
+    margin-top: 1px;
+    font-family: "Calibri";
+    font-size: 16px;
+    color: #ffffff;
+    text-align: center;
+
+}
+
+#bus-info-window {
+    max-width: 400px;
+    max-height: 300px;
+    background-color: #243b7f;
+    border-radius: 10px;
+    color: #f1ecec;
+    padding: 3px;
+}
+
+/* Styling the Google Maps custom info window */
+.custom-info-window {
+    max-width: 300px;
+    background-color: #000000;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    font-family: 'Arial', sans-serif;
+    color: #ffffff;
+}
+
+/* Additional content styling within the info window */
+.custom-info-window .info-content p {
+    margin: 5px 0;
+}
+
+.custom-info-window p strong {
+    color: #ffd500;  /* Color customization for labels */
+}
+
+/* Optional: Customize further with specific widths, padding, fonts, etc. */
+
+
+
+
